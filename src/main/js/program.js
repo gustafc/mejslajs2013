@@ -17,8 +17,8 @@ println("****************************");
 printUsage();
 +function mainLoop(con){
 	function handleCommand(cmd) {
-		if (cmd == Command.QUIT) return false;
 		switch (cmd) {
+			case Command.QUIT: return false;
 			case Command.HELP: 
 				printUsage();
 				break;
