@@ -1,27 +1,42 @@
-load("polyfill/Array.js");
 load("package.js");
 load("console.js");
+load("phonebook/search.js");
+load("phonebook/ui/showEntry.js");
 load("phonebook/ui/readEntry.js");
 
 println = null;
 
 +function mainLoop(con){
+	var contacts = [
+		{firstName: "Francoise", lastName: "Bedel", phone: "070-123 45 67"},
+		{firstName: "Andre", lastName: "Clouet", phone: "070-987 65 43"},
+		{firstName: "Dom", lastName: "Perignon", phone: "076-345 67 89"}
+	];
+	con.println("Welcome to the address book!");
+	con.println("****************************");
 	function printUsage(){
 		con.println("Available commands:");
-		["H", "L", "A", "Q"].foreach(function(cmd){
+		["H", "L", "F", "A", "Q"].forEach(function(cmd){
 			con.println(cmd + "\t" + commands[cmd].description);
 		});
 	}
 	function printInfo(){ 
-		con.println(contacts.length + " contacts in phonebook."); 
+		con.println("You have " + contacts.length + " contacts in your phonebook."); 
 	}
 	var commands = {
 		"H": {description: "Show help", run: printUsage },
 		"L": {description: "List contacts", run: function(){
-			contacts.foreach(function(c){ con.println(c.firstName + " " + c.lastName + ": " + c.phone) });
+			contacts.forEach(phonebook.ui.showEntry(con));
 			printInfo();
 		}},
-		"A": {description: "Add entry", run: function(){ 
+		"F": {description: "Find contacts", run: function(){
+			var matching = phonebook.search(contacts, con.readString("Enter search string"), ["firstName", "lastName"]);
+			if (matching.length > 0) {
+				matching.forEach(phonebook.ui.showEntry(con));
+				con.println(matching.length + " matching records.");
+			} else con.println("No matching entries.");
+		}},
+		"A": {description: "Add contact", run: function(){ 
 			var newEntry = phonebook.ui.readEntry(con);
 			if (newEntry) {
 				contacts.push(newEntry);
@@ -30,10 +45,6 @@ println = null;
 		}},
 		"Q": {description: "Quit", run: function(){ con.println("Bye!")}, terminal: true },
 	}
-	var contacts = [];
-	con.println("Welcome to the address book!");
-	con.println("****************************");
-	printUsage();
 	function handleCommand(commandString) {
 		var cmd = commands[commandString.toUpperCase()];
 		if (!cmd || typeof cmd.description !== "string" || typeof cmd.run !== "function")  {
@@ -44,6 +55,8 @@ println = null;
 		cmd.run();
 		return !cmd.terminal;
 	}
+	printUsage();
+	printInfo();
 	while (handleCommand(con.readNonEmpty("What would you like to do?")))
 		/* Do nothing */;
 }(console.stdio)
