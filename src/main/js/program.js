@@ -5,6 +5,8 @@ load("phonebook/renderEntry.js");
 load("phonebook/ui/showEntry.js");
 load("phonebook/ui/readEntry.js");
 load("phonebook/ui/removeEntries.js");
+load("phonebook/ui/searchEntries.js");
+load("phonebook/ui/sortEntries.js");
 
 println = null;
 
@@ -18,9 +20,13 @@ println = null;
 	con.println("****************************");
 	function printUsage(){
 		con.println("Available commands:");
-		["H", "A", "L", "F", "R", "Q"].forEach(function(cmd){
+		["H", "A", "L", "F", "S", "R", "Q"].forEach(function(cmd){
 			con.println(cmd + "\t" + commands[cmd].description);
 		});
+	}
+	function printContacts(){ 
+		contacts.forEach(phonebook.ui.showEntry(con));
+		printInfo();
 	}
 	function printInfo(){ 
 		con.println("You have " + contacts.length + " contacts in your phonebook."); 
@@ -35,15 +41,14 @@ println = null;
 			}
 		}},
 		"L": {description: "List contacts", run: function(){
-			contacts.forEach(phonebook.ui.showEntry(con));
-			printInfo();
+			printContacts();
 		}},
-		"F": {description: "Find contacts", run: function(){
-			var matching = phonebook.search(contacts, con.readString("Enter search string"), ["firstName", "lastName"]);
-			if (matching.length > 0) {
-				matching.forEach(phonebook.ui.showEntry(con));
-				con.println(matching.length + " matching records.");
-			} else con.println("No matching entries.");
+		"F": {description: "Find contacts", run: function () {
+			phonebook.ui.searchEntries(con, contacts);
+		}},
+		"S": {description: "Sort contacts", run: function(){
+			phonebook.ui.sortEntries(con, contacts);
+			printContacts();
 		}},
 		"R": {description: "Remove contacts", run: function(){
 			var sizeBefore = contacts.length;
