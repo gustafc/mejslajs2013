@@ -1,21 +1,33 @@
-function console(readString) {
+function console(source, sink) {
 	function readUntil(prompt, validate) {
-		var validation, input = readString(prompt);
+		var validation, input = this.readString(prompt);
 		while ((validation = validate(input)) !== undefined) {
-			input = readString(validation);
+			input = this.readString(validation);
 		}
 		return input;
 	}
 	function readNonEmpty(prompt, promptWhenEmpty) {
-		return readUntil(prompt, function (s) { if (!s) return promptWhenEmpty || prompt; });
+		return this.readUntil(prompt, function (s) { if (!s) return promptWhenEmpty || prompt; });
+	}
+	function readAll(prompts){
+		var read = [];
+		for (var i = 0; i < prompts.length; i++) {
+			var s = this.readString(prompts[i]);
+			if (s) read.push(s);
+			else return undefined;
+		}
+		return read;
 	}
 	return {
-		readString: readString,
+		readString: source,
 		readUntil: readUntil,
-		readNonEmpty: readNonEmpty
+		readNonEmpty: readNonEmpty,
+		readAll: readAll,
+		print: sink,
+		println: function println(s){this.print(s + "\n");}
 	};
 }
 
-console.stdin = console(function(prompt){
+console.stdio = console(function(prompt){
 	return String(read(prompt + "> "));
-});
+}, print);
