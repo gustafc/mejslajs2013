@@ -1,8 +1,10 @@
 load("package.js");
 load("console.js");
 load("phonebook/search.js");
+load("phonebook/renderEntry.js");
 load("phonebook/ui/showEntry.js");
 load("phonebook/ui/readEntry.js");
+load("phonebook/ui/removeEntries.js");
 
 println = null;
 
@@ -16,7 +18,7 @@ println = null;
 	con.println("****************************");
 	function printUsage(){
 		con.println("Available commands:");
-		["H", "L", "F", "A", "Q"].forEach(function(cmd){
+		["H", "A", "L", "F", "R", "Q"].forEach(function(cmd){
 			con.println(cmd + "\t" + commands[cmd].description);
 		});
 	}
@@ -25,6 +27,13 @@ println = null;
 	}
 	var commands = {
 		"H": {description: "Show help", run: printUsage },
+		"A": {description: "Add contact", run: function(){ 
+			var newEntry = phonebook.ui.readEntry(con);
+			if (newEntry) {
+				contacts.push(newEntry);
+				printInfo();
+			}
+		}},
 		"L": {description: "List contacts", run: function(){
 			contacts.forEach(phonebook.ui.showEntry(con));
 			printInfo();
@@ -36,12 +45,11 @@ println = null;
 				con.println(matching.length + " matching records.");
 			} else con.println("No matching entries.");
 		}},
-		"A": {description: "Add contact", run: function(){ 
-			var newEntry = phonebook.ui.readEntry(con);
-			if (newEntry) {
-				contacts.push(newEntry);
-				printInfo();
-			}
+		"R": {description: "Remove contacts", run: function(){
+			var sizeBefore = contacts.length;
+			contacts = phonebook.ui.removeEntries(con, contacts);
+			con.print((sizeBefore - contacts.length) + " contacts removed. ");
+			printInfo();
 		}},
 		"Q": {description: "Quit", run: function(){ con.println("Bye!")}, terminal: true },
 	}

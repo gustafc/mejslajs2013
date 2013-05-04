@@ -1,13 +1,13 @@
 function console(source, sink) {
-	function readUntil(prompt, validate) {
+	function readWhile(prompt, validate) {
 		var validation, input = this.readString(prompt);
-		while ((validation = validate(input)) !== undefined) {
-			input = this.readString(validation);
+		while ((validation = validate(input))) {
+			input = this.readString(typeof validation === "string" ? validation : prompt);
 		}
 		return input;
 	}
 	function readNonEmpty(prompt, promptWhenEmpty) {
-		return this.readUntil(prompt, function (s) { if (!s) return promptWhenEmpty || prompt; });
+		return this.readWhile(prompt, function (s) { if (!s) return promptWhenEmpty || prompt; });
 	}
 	function readAll(prompts){
 		var read = [];
@@ -20,7 +20,7 @@ function console(source, sink) {
 	}
 	return {
 		readString: source,
-		readUntil: readUntil,
+		readWhile: readWhile,
 		readNonEmpty: readNonEmpty,
 		readAll: readAll,
 		print: sink,
